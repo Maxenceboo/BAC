@@ -14,4 +14,4 @@ if [ ! "$(docker network ls | grep "$NETWORK_NAME")" ]; then
   docker network create $NETWORK_NAME
 fi
 
-docker run --rm -it -v $dir:/opt/ -w /opt/ --net $NETWORK_NAME -e BROKER_HOST=$RABBIT_HOST node:18.19.0-buster npm i
+docker run --rm -it -v $dir:/opt/ -w /opt/ --net $NETWORK_NAME -e BROKER_HOST=$RABBIT_HOST node:18.19.0-buster node src/main/js/publisher/bac.js
