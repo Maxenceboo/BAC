@@ -17,7 +17,7 @@ async function publish() {
     const poidsMax = 1000;
     const interval = 3000; // 5 minutes
 
-    const id = process.env.ID;
+    // const id = process.env.ID;
 
     const conn = await amqp.connect(`amqp://${process.env.BROKER_HOST}`); // ou l'URL de votre broker RabbitMQ
     const channel = await conn.createChannel();
@@ -29,7 +29,9 @@ async function publish() {
   
     setInterval(async () => {
         const poidsSim = genPoidsRandom(poidsMax);
-        const message = `{id: '${id}', poids: ${poidsSim.toFixed(2)}}`;
+        // const message = `{id: '${id}', poids: ${poidsSim.toFixed(2)}}`;
+        const message = `{ poids: ${poidsSim.toFixed(2)}}`;
+
         console.log(message)
         await publishMessage(channel, queue, message);
     }, interval);
