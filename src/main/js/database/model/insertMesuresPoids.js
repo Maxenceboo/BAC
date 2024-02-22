@@ -1,9 +1,12 @@
 const knex = require('../db');
 
 
-export async function insertMesuresPoids(poids) {
-    await knex('mesures_poids').insert({
+async function insertMesuresPoids(poids, id, date){
+    await knex.insert({
+        id_bac: id,
         poids: poids,
-        times: new Date()
-    });
+        times: date
+    }).into('mesures_poids');
 }
+
+module.exports = { insertMesuresPoids };

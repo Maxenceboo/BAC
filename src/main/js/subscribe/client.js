@@ -1,7 +1,15 @@
 const amqp = require('amqplib');
-const db = require('./database/db');
+const insertMesuresPoids = require('../database/model/insertMesuresPoids');
 
 async function subscribe() {
+
+
+  
+  sleep = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  await sleep(10000);
+
+
+
   const conn = await amqp.connect(`amqp://${process.env.BROKER_HOST}`); // ou l'URL de votre broker RabbitMQ
   const channel = await conn.createChannel();
   
@@ -13,7 +21,21 @@ async function subscribe() {
   console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
   channel.consume(queue, function(msg) {
     console.log(" [x] Received %s", msg.content.toString());
-
+    console.log(" [x] Received %s", msg.content);
+    let _msg = JSON.parse(msg.content.toString());
+    let poids = _msg.poids;
+    let id_bac = _msg.id_bac;
+    let times = new Date(parseInt(_msg.times));
+    console.log(poids);
+    console.log(id_bac);
+    console.log(times);
+    try {
+      insertMesuresPoids.insertMesuresPoids(poids, id_bac, times);
+    } catch (error) {
+      console.error(error);
+    }finally {
+      console.log('Message traité');
+    }
 
     // TODO insert dans une BDD
 

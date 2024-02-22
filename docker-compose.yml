@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  my_postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_password
+      POSTGRES_DB: my_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mqtt-network
+
+  app_build:
+    image: node:18.19.0-buster
+    volumes:
+      - .:/opt
+    working_dir: /opt
+    command: ["npm", "install"]
+    depends_on:
+      - my_postgres
+    networks:
+      - mqtt-network
+    environment:
+      - BROKER_HOST=rabbit
+
+  migration:
+    image: node:18.19.0-buster
+    volumes:
+      - .:/opt
+    working_dir: /opt
+    command: ["node", "src/main/js/database/migration/202401261523_create_mesures_poids_tables.js"]
+    depends_on:
+      - app_build
+    networks:
+      - mqtt-network
+    environment:
+      - BROKER_HOST=rabbit
+
+  rabbit:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    depends_on:
+      - migration
+    networks:
+      - mqtt-network
+
+  subscriber:
+    image: node:18.19.0-buster
+    volumes:
+      - .:/opt
+    working_dir: /opt
+    command: ["node", "src/main/js/subscribe/client.js"]
+    depends_on:
+      - rabbit
+    networks:
+      - mqtt-network
+    environment:
+      - BROKER_HOST=rabbit
+
+  publisher:
+    image: node:18.19.0-buster
+    volumes:
+      - .:/opt
+    working_dir: /opt
+    command: ["node", "src/main/js/publisher/bac.js"]
+    depends_on:
+      - rabbit
+    networks:
+      - mqtt-network
+    environment:
+      - BROKER_HOST=rabbit
+
+networks:
+  mqtt-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
