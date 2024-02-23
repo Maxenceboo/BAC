@@ -6,18 +6,19 @@
 
 
 const amqp = require('amqplib');
-const db = require('./database/db');
+const db = require('../database/db.js');
 const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey('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');
 
-async function subscribe() {
-
-
+async function alarm() {
+        
     
     sleep = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-    await sleep(8000);
+    await sleep(10000);
 
-    
+    const sgMail = require('@sendgrid/mail');
+
+    sgMail.setApiKey('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');
+  
 
     const conn = await amqp.connect(`amqp://${process.env.BROKER_HOST}`); // ou l'URL de votre broker RabbitMQ
     const channel = await conn.createChannel();
@@ -32,11 +33,13 @@ async function subscribe() {
         console.log(" [x] Received %s", msg.content.toString());
 
         const poidsMax = 1000;
-        const seuilPoids = poidsMax * 0.75;
-        if (msg.content.poids >= seuilPoids) {
+        const seuilPoids = poidsMax * 0.75; // modifier le seuil selon le besoin
+        let _msg = JSON.parse(msg.content.toString());
+
+        if (_msg.poids >= seuilPoids) {
             const msg = {
                 to: 'medinateo64@gmail.com',
-                from: 'bacpluskatre@gmail.com',
+                from: 'contact.wargnier@gmail.com',
                 subject: '[BAC ALERTE] Seuil atteint',
                 text: 'Le bac à déchets a franchi le seuil des 75% de remplissage, -|BacBac|- over.',
             }
@@ -55,5 +58,7 @@ async function subscribe() {
         noAck: true
     });
 }
+
+alarm().catch(console.error);
 
 

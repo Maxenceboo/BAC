@@ -19,7 +19,7 @@ async function subscribe() {
   });
   
   console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
-  channel.consume(queue, function(msg) {
+  channel.consume(queue, async function(msg) {
     console.log(" [x] Received %s", msg.content.toString());
     console.log(" [x] Received %s", msg.content);
     let _msg = JSON.parse(msg.content.toString());
@@ -30,9 +30,9 @@ async function subscribe() {
     console.log(id_bac);
     console.log(times);
     try {
-      insertMesuresPoids.insertMesuresPoids(poids, id_bac, times);
+       await insertMesuresPoids.insertMesuresPoids(poids, id_bac, times);
     } catch (error) {
-      console.error(error);
+        console.error(error);
     }finally {
       console.log('Message traité');
     }

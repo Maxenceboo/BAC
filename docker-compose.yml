@@ -2,15 +2,18 @@ version: '3.8'
 
 services:
   my_postgres:
-    image: postgres
+    image: postgres:14.11
     environment:
       POSTGRES_USER: my_user
       POSTGRES_PASSWORD: my_password
       POSTGRES_DB: my_db
+    ports:
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - mqtt-network
+      - postgres_data2:/var/lib/postgresql/data
+      - ./src/main/js/database/migration/init.sql:/docker-entrypoint-initdb.d/init.sql
+    # networks:
+    #   - mqtt-network
 
   app_build:
     image: node:18.19.0-buster
@@ -20,23 +23,23 @@ services:
     command: ["npm", "install"]
     depends_on:
       - my_postgres
-    networks:
-      - mqtt-network
+    # networks:
+    #   - mqtt-network
     environment:
       - BROKER_HOST=rabbit
 
-  migration:
-    image: node:18.19.0-buster
-    volumes:
-      - .:/opt
-    working_dir: /opt
-    command: ["node", "src/main/js/database/migration/202401261523_create_mesures_poids_tables.js"]
-    depends_on:
-      - app_build
-    networks:
-      - mqtt-network
-    environment:
-      - BROKER_HOST=rabbit
+  # migration:
+  #   image: node:18.19.0-buster
+  #   volumes:
+  #     - .:/opt
+  #   working_dir: /opt
+  #   command: ["node", "src/main/js/database/migration/202401261523_create_mesures_poids_tables.js"]
+  #   depends_on:
+  #     - my_postgres
+  #   # networks:
+  #   #   - mqtt-network
+  #   environment:
+  #     - BROKER_HOST=rabbit
 
   rabbit:
     image: rabbitmq:3-management
@@ -44,9 +47,9 @@ services:
       - "5672:5672"
       - "15672:15672"
     depends_on:
-      - migration
-    networks:
-      - mqtt-network
+      - my_postgres
+    # networks:
+    #   - mqtt-network
 
   subscriber:
     image: node:18.19.0-buster
@@ -56,8 +59,23 @@ services:
     command: ["node", "src/main/js/subscribe/client.js"]
     depends_on:
       - rabbit
-    networks:
-      - mqtt-network
+      - my_postgres
+    # networks:
+    #   - mqtt-network
+    environment:
+      - BROKER_HOST=rabbit
+
+  alarms:
+    image: node:18.19.0-buster
+    volumes:
+      - .:/opt
+    working_dir: /opt
+    command: ["node", "src/main/js/subscribe/alarms.js"]
+    depends_on:
+      - rabbit
+      - my_postgres
+    # networks:
+    #   - mqtt-network
     environment:
       - BROKER_HOST=rabbit
 
@@ -69,14 +87,26 @@ services:
     command: ["node", "src/main/js/publisher/bac.js"]
     depends_on:
       - rabbit
-    networks:
-      - mqtt-network
+    # networks:
+    #   - mqtt-network
+    environment:
+      - BROKER_HOST=rabbit
+# networks:
+#   mqtt-network:
+#     driver: bridge
+
+  api:
+    image: node:18.19.0-buster
+    volumes:
+      - .:/opt
+    working_dir: /opt
+    command: ["node", "src/main/js/api/index.js"]
+    depends_on:
+      - my_postgres
+    # networks:
+    #   - mqtt-network
     environment:
       - BROKER_HOST=rabbit
 
-networks:
-  mqtt-network:
-    driver: bridge
-
 volumes:
-  postgres_data:
+  postgres_data2:
