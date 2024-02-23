@@ -3,6 +3,7 @@ import * as mesureController from '../controllers/mesureController.js';
 
 const router = express.Router();
 
-router.post('/mesures', mesureController.statMesures);
+router.get('/test', mesureController.statMesures);
+router.get('/', console.log('test'));
 
 export default router;

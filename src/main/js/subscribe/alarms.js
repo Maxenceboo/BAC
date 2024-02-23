@@ -17,8 +17,8 @@ async function alarm() {
 
     const sgMail = require('@sendgrid/mail');
 
-    sgMail.setApiKey('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');
-  
+    // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    sgMail.setApiKey("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");
 
     const conn = await amqp.connect(`amqp://${process.env.BROKER_HOST}`); // ou l'URL de votre broker RabbitMQ
     const channel = await conn.createChannel();
@@ -36,7 +36,8 @@ async function alarm() {
         const seuilPoids = poidsMax * 0.75; // modifier le seuil selon le besoin
         let _msg = JSON.parse(msg.content.toString());
 
-        if (_msg.poids >= seuilPoids) {
+        // if (_msg.poids >= seuilPoids) {
+        if (false) {
             const msg = {
                 to: 'medinateo64@gmail.com',
                 from: 'contact.wargnier@gmail.com',

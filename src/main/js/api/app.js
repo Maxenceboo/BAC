@@ -1,7 +1,8 @@
 import cors from 'cors';
 import express from 'express';
-import { Request, Response, NextFunction } from 'express';
 import morgan from 'morgan';
+
+import mesureRoutes from './routes/mesureRoutes.js';
 
 const app = express();
 
@@ -15,6 +16,8 @@ app.use(cors(
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
     }
 ));
+
+app.use('/api/mesures', mesureRoutes);
 
 app.use((error, req, res, next) => {
     res.status(error.status || 500);
