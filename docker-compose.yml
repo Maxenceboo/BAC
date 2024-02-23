@@ -27,20 +27,7 @@ services:
     #   - mqtt-network
     environment:
       - BROKER_HOST=rabbit
-
-  # migration:
-  #   image: node:18.19.0-buster
-  #   volumes:
-  #     - .:/opt
-  #   working_dir: /opt
-  #   command: ["node", "src/main/js/database/migration/202401261523_create_mesures_poids_tables.js"]
-  #   depends_on:
-  #     - my_postgres
-  #   # networks:
-  #   #   - mqtt-network
-  #   environment:
-  #     - BROKER_HOST=rabbit
-
+      
   rabbit:
     image: rabbitmq:3-management
     ports:
@@ -87,6 +74,7 @@ services:
     command: ["node", "src/main/js/publisher/bac.js"]
     depends_on:
       - rabbit
+      - my_postgres
     # networks:
     #   - mqtt-network
     environment:

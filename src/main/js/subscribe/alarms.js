@@ -2,23 +2,21 @@
 
 // https://sendgrid.com/en-us
 
-// api key : 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
-
 
 const amqp = require('amqplib');
-const db = require('../database/db.js');
-const sgMail = require('@sendgrid/mail');
+
+
 
 async function alarm() {
         
     
     sleep = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-    await sleep(10000);
+    await sleep(20000);
 
     const sgMail = require('@sendgrid/mail');
 
     // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    sgMail.setApiKey("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");
+    sgMail.setApiKey("key");
 
     const conn = await amqp.connect(`amqp://${process.env.BROKER_HOST}`); // ou l'URL de votre broker RabbitMQ
     const channel = await conn.createChannel();
@@ -36,10 +34,9 @@ async function alarm() {
         const seuilPoids = poidsMax * 0.75; // modifier le seuil selon le besoin
         let _msg = JSON.parse(msg.content.toString());
 
-        // if (_msg.poids >= seuilPoids) {
-        if (false) {
+        if (_msg.poids >= seuilPoids) {
             const msg = {
-                to: 'medinateo64@gmail.com',
+                to: 'wasadeft.pro@gmail.com',
                 from: 'contact.wargnier@gmail.com',
                 subject: '[BAC ALERTE] Seuil atteint',
                 text: 'Le bac à déchets a franchi le seuil des 75% de remplissage, -|BacBac|- over.',

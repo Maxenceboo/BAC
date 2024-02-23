@@ -20,7 +20,7 @@ async function publish() {
     // const id = process.env.ID;
 
     sleep = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-    await sleep(10000);
+    await sleep(20000);
 
     const conn = await amqp.connect(`amqp://${process.env.BROKER_HOST}`); // ou l'URL de votre broker RabbitMQ
     const channel = await conn.createChannel();
